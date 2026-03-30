@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="row justify-content-center mt-5">
+  <div class="col-md-4">
+    <div class="card shadow">
+      <div class="card-body p-4">
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4" id="authTab">
+          <li class="nav-item">
+            <button class="nav-link {% if not show_register %}active{% endif %}"
+                    onclick="showTab('login')">Login</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link {% if show_register %}active{% endif %}"
+                    onclick="showTab('register')">Register</button>
+          </li>
+        </ul>
+
+        <!-- Login Form -->
+        <div id="loginForm" {% if show_register %}style="display:none"{% endif %}>
+          <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" name="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+          </form>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" {% if not show_register %}style="display:none"{% endif %}>
+          <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Username</label>
+              <input type="text" name="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input type="password" name="password1" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Confirm Password</label>
+              <input type="password" name="password2" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Register</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(tab) {
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.querySelectorAll('.nav-link').forEach((el, i) => {
+    el.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+  });
+}
+</script>
+
+{% endblock %}

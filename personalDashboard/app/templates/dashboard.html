@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0">Your Items</h5>
+  <button class="btn btn-primary btn-sm" onclick="openModal()">+ Add Item</button>
+</div>
+
+<!-- Items Table -->
+{% if items %}
+<table class="table table-bordered table-hover bg-white shadow-sm">
+  <thead class="table-dark">
+    <tr>
+      <th>#</th>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ item.title }}</td>
+      <td>{{ item.description }}</td>
+      <td>{{ item.created_at|date:"M d, Y" }}</td>
+      <td>
+        <button class="btn btn-warning btn-sm"
+          onclick="openEdit('{{ item.pk }}', '{{ item.title }}', `{{ item.description }}`)">
+          Edit
+        </button>
+        <form method="post" action="{% url 'item_delete' item.pk %}" style="display:inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger btn-sm"
+                  onclick="return confirm('Delete this item?')">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p class="text-muted">No items yet. Click <strong>+ Add Item</strong> to start.</p>
+{% endif %}
+
+<!-- Add / Edit Modal -->
+<div class="modal fade" id="itemModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Add Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" id="itemForm">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" name="title" id="fieldTitle" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" id="fieldDesc" class="form-control" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary" id="submitBtn">Save</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+const modal = new bootstrap.Modal(document.getElementById('itemModal'));
+
+function openModal() {
+  document.getElementById('modalTitle').innerText = 'Add Item';
+  document.getElementById('itemForm').action = "{% url 'item_create' %}";
+  document.getElementById('fieldTitle').value = '';
+  document.getElementById('fieldDesc').value = '';
+  modal.show();
+}
+
+function openEdit(pk, title, desc) {
+  document.getElementById('modalTitle').innerText = 'Edit Item';
+  document.getElementById('itemForm').action = `/item/update/${pk}/`;
+  document.getElementById('fieldTitle').value = title;
+  document.getElementById('fieldDesc').value = desc;
+  modal.show();
+}
+</script>
+
+{% endblock %}
