@@ -36,13 +36,13 @@ jobs:
       - name : Setup SSH
         run : |
           mkdir -p ~/.ssh/
-          echo "${{ secrets.AWS_EC2_KEY}}" > ~/.ssh/id_rsa
+          echo "${{ secrets.AWS_EC2_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy to aws 
         
         run: |
-           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER}}@${{ secrets.AWS_EC2_IP}} << 'EOF'
+           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_IP }} << 'EOF'
 
            ########## case 2 : env folder inside ubuntu folder #######
            cd /home/ubuntu/
