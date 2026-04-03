@@ -36,40 +36,25 @@ jobs:
       - name : Setup SSH
         run : |
           mkdir -p ~/.ssh/
-          echo "${{ secrets.AWS_EC2_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.AWS_EC2_KEY}}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy to aws 
         
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_IP }} << 'EOF'
+           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_IP }} << 'EOF'
 
+           ########## case 2 : env folder inside ubuntu folder #######
+           cd /home/ubuntu/
+           source env/bin/activate
+           git pull origin main
 
-          ###### case 1 : env folder inside the project folder ######
+           pip install -r requirements.txt
+       
+           cd /home/ubuntu/personalDashboard/PersonalDashboard
+           python manage.py migrate
 
-          # cd /home/ubuntu/<project_folder_name>
-          # source env/bin/activate
+           sudo supervisorctl restart all   
+           sudo systemctl restart nginx
 
-          # git pull origin main
-
-          # pip install -r requirements.txt
-
-          # python manage.py migrate
-
-          # sudo supervisorctl restart all
-          # sudo systemctl restart nginx
-
-          ########## case 2 : env folder inside ubuntu folder #######
-
-          cd /home/ubuntu/
-          source env/bin/activate
-
-          git pull origin main
-
-          pip install -r requirements.txt
-
-          cd /home/ubuntu/<project_folder_name>
-          python manage.py migrate
-
-          sudo supervisorctl restart all
-          sudo systemctl restart nginx
+           EOF
