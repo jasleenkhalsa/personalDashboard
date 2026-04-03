@@ -1,5 +1,4 @@
 # This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the workflow will run
@@ -10,9 +9,11 @@ on:
   pull_request:
     branches: [ "main" ]
 
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
+  # build:
   deploy:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
@@ -31,35 +32,44 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-
-      - name: Setup SSH
+      
+      - name : Setup SSH
         run : |
-          mkdir -p~/.ssh/
+          mkdir -p ~/.ssh/
           echo "${{ secrets.AWS_EC2_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Deploy to aws
+      - name: Deploy to aws 
+        
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_IP }} << 'EOF'
 
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.AWS_EC2_IP }}
-          username: ${{ secrets.AWS_EC2_USER }}
-          key: ${{ secrets.AWS_EC2_KEY }}
 
-          script: |
-            cd /home/ubuntu/<project name>
-           
-            # we need to pull
-            git pull origin main
+          ###### case 1 : env folder inside the project folder ######
 
-            # we need to activate our env
-            source env/bin/activate
+          cd /home/ubuntu/<project_folder_name>
+          source env/bin/activate
 
-            # we need to install our requirements
-            #pip install -r requirements.txt
+          git pull origin main
 
-            # we need to run our migrations
-            python3 manage.py migrate
+          pip install -r requirements.txt
 
-            # restart gunicorn to refresh the server
-            sudo systemctl restart gunicorn
+          python manage.py migrate
+
+          sudo supervisorctl restart all
+          sudo systemctl restart nginx
+
+          ########## case 2 : env folder inside ubuntu folder #######
+
+          cd /home/ubuntu/
+          source env/bin/activate
+
+          git pull origin main
+
+          pip install -r requirements.txt
+
+          cd /home/ubuntu/<project_folder_name>
+          python manage.py migrate
+
+          sudo supervisorctl restart all
+          sudo systemctl restart nginx
